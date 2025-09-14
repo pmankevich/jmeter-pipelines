@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-  JMETER_HOME = 'C:/Users/p.mankevich/Documents/JMeter all versions/apache-jmeter-5.5'
+  JMETER_HOME = 'C:/Users/p.mankevich/Documents/JMeter_all_versions/apache-jmeter-5.5'
   JMETER_BIN  = "${env.JMETER_HOME}/bin/jmeter.bat"
 }
 
