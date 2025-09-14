@@ -1,14 +1,24 @@
 pipeline {
   agent any
 
+  // Автозапуск: опрос репозитория каждые 2 минуты
+  triggers {
+    pollSCM('* * * * *')
+  }
+
   stages {
     stage('Checkout') {
-      steps {
-        checkout scm
-      }
+      steps { checkout scm }
     }
 
     stage('Run JMeter') {
+      // Гоним тест, если изменялись *.jmx ИЛИ если это ручной запуск
+      when {
+        anyOf {
+          changeset "tests/**/*.jmx"
+          expression { currentBuild.rawBuild?.getCause(hudson.model.Cause$UserIdCause) != null }
+        }
+      }
       steps {
         bat """
           if exist report_html rmdir /S /Q report_html
@@ -21,6 +31,12 @@ pipeline {
     }
 
     stage('Publish Report') {
+      when {
+        anyOf {
+          changeset "tests/**/*.jmx"
+          expression { currentBuild.rawBuild?.getCause(hudson.model.Cause$UserIdCause) != null }
+        }
+      }
       steps {
         publishHTML(target: [
           reportDir: 'report_html',
