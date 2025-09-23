@@ -15,7 +15,7 @@ pipeline {
         // HTTP-проверка: 200..399 — ок, иначе фейлим билд
         powershell '''
           $ErrorActionPreference = "Stop"
-          $url = "https://www.google2.com"
+          $url = "https://www.google.com"
           Write-Host "Health check: $url"
           try {
             $resp = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 10
