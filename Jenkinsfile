@@ -1,9 +1,8 @@
 pipeline {
   agent any
 
-  // Автозапуск: опрос репозитория каждые 2 минуты
   triggers {
-    pollSCM('* * * * *')
+    pollSCM('* * * * *') // опрос репо каждую минуту
   }
 
   stages {
@@ -11,8 +10,28 @@ pipeline {
       steps { checkout scm }
     }
 
+    stage('Health Check') {
+      steps {
+        // HTTP-проверка: 200..399 — ок, иначе фейлим билд
+        powershell '''
+          $ErrorActionPreference = "Stop"
+          $url = "https://www.google.com"
+          Write-Host "Health check: $url"
+          try {
+            $resp = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 10
+            if ($resp.StatusCode -ge 200 -and $resp.StatusCode -lt 400) {
+              Write-Host "OK: status $($resp.StatusCode)"
+            } else {
+              Write-Error "Bad status: $($resp.StatusCode)"
+            }
+          } catch {
+            Write-Error ("Health check failed: " + $_.Exception.Message)
+          }
+        '''
+      }
+    }
+
     stage('Run JMeter') {
-      // Гоним тест, если изменялись *.jmx ИЛИ если это ручной запуск
       when {
         anyOf {
           changeset "tests/**/*.jmx"
