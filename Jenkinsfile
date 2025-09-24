@@ -12,7 +12,6 @@ pipeline {
 
     stage('Health Check') {
       steps {
-        // HTTP-проверка: 200..399 — ок, иначе фейлим билд
         powershell '''
           $ErrorActionPreference = "Stop"
           $url = "https://www.google.com"
@@ -34,8 +33,8 @@ pipeline {
     stage('Run JMeter') {
       when {
         anyOf {
-          changeset "tests/**/*.jmx"
-          expression { currentBuild.rawBuild?.getCause(hudson.model.Cause$UserIdCause) != null }
+          changeset "tests/**/*.jmx"   // автозапуск при изменении .jmx
+          triggeredBy 'UserIdCause'    // всегда выполнять при ручном запуске
         }
       }
       steps {
@@ -53,7 +52,7 @@ pipeline {
       when {
         anyOf {
           changeset "tests/**/*.jmx"
-          expression { currentBuild.rawBuild?.getCause(hudson.model.Cause$UserIdCause) != null }
+          triggeredBy 'UserIdCause'
         }
       }
       steps {
