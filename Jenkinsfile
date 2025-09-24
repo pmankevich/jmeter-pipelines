@@ -3,6 +3,7 @@ pipeline {
 
   triggers {
     pollSCM('* * * * *') // опрос репо каждую минуту
+    cron {('* * * * *')}
   }
 
   stages {
